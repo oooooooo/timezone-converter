@@ -1,0 +1,93 @@
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>Timezone Converter from human-readable date </title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/bulma-prefers-dark" />
+    <style>
+        td { width: 50%; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"
+            integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.26/moment-timezone-with-data.min.js"
+            integrity="sha256-6EFCRhQs5e10gzbTAKzcFFWcpDGNAzJjkQR3i1lvqYE=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chrono-node@1.0.5/chrono.min.js"></script>
+</head>
+<body>
+<section class="section">
+    <div class="container content">
+        <h1>Timezone Converter from human-readable date</h1>
+        <div class="field">
+            <div class="control">
+                <input class="input is-primary is-large" id="query" placeholder="Ex. 2019-01-12 10:12 JST" autofocus />
+            </div>
+        </div>
+
+        <table class="table">
+            <tr>
+                <td>Parse result</td>
+                <td id="result"></td>
+            </tr>
+            <tr>
+                <td>America/Los_Angeles</td>
+                <td class="America-Los_Angeles"></td>
+            </tr>
+            <tr>
+                <td>UTC</td>
+                <td class="UTC"></td>
+            </tr>
+            <tr>
+                <td>Asia/Tokyo</td>
+                <td class="Asia-Tokyo"></td>
+            </tr>
+        </table>
+
+        <div class="field">
+            <div class="control">
+                <input class="input is-primary" id="filter" placeholder="Ex. Asia" />
+            </div>
+        </div>
+
+        <table class="table" id="world">
+            <template id="timezones">
+                <tr>
+                    <td class="caption"></td>
+                    <td class="date"></td>
+                </tr>
+            </template>
+        </table>
+    </div>
+</section>
+<script>
+    const query = document.querySelector('#query')
+    query.addEventListener('keyup', event => timezone_convert(event))
+
+    const table = document.querySelector('#world')
+    moment.tz.names().filter(tz => {
+        const timezones = document.importNode(document.getElementById('timezones').content, true)
+        const caption = timezones.querySelector('.caption')
+        const date = timezones.querySelector('.date')
+        caption.innerText = tz
+        date.className = tz.replace(/[\/\+]/g, '-')
+        table.appendChild(timezones)
+    })
+
+    const timezone_convert = event => {
+        try {
+            const date = moment(chrono.parse(event.target.value)[0].start.date())
+            document.getElementById('result').innerText = date
+            moment.tz.names().filter(tz => {
+                [...document.querySelectorAll('.' + tz.replace(/[\/\+]/g, '-'))].map(className =>
+                    className.innerText = date.clone().tz(tz)
+                )
+            })
+        }
+        catch(error) {
+            if (error instanceof TypeError === false) {
+                console.error('chrono.parse', error)
+            }
+        }
+    }
+</script>
+</body>
+</html>
